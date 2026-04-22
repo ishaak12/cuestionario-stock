@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuestionario de Gestión de Stock</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --border:#dbe3ee;
+      --primary:#1d4ed8;
+      --primary-hover:#1e40af;
+      --ok-bg:#ecfdf5;
+      --ok-text:#065f46;
+      --error-bg:#fef2f2;
+      --error-text:#991b1b;
+      --help-bg:#0f172a;
+      --help-text:#ffffff;
+      --help-icon:#2563eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:920px;
+      margin:32px auto;
+      padding:0 16px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:24px;
+      box-shadow:0 8px 24px rgba(15,23,42,.06);
+    }
+    h1{
+      margin:0 0 8px;
+      font-size:30px;
+    }
+    .intro{
+      margin:0 0 12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+    .intro-box{
+      background:#eef4ff;
+      border:1px solid #cfe0ff;
+      border-radius:12px;
+      padding:14px 16px;
+      color:#1e3a8a;
+      font-size:14px;
+      line-height:1.5;
+      margin-bottom:24px;
+    }
+    fieldset{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:18px;
+      margin:0 0 18px;
+    }
+    legend{
+      font-weight:700;
+      padding:0 8px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    .full{grid-column:1 / -1;}
+    @media (max-width:760px){
+      .grid{grid-template-columns:1fr}
+    }
+    label{
+      display:flex;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:6px;
+      font-weight:700;
+      margin-bottom:6px;
+      line-height:1.35;
+    }
+    .hint{
+      display:block;
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+    input, select, textarea{
+      width:100%;
+      border:1px solid #cbd5e1;
+      border-radius:10px;
+      padding:11px 12px;
+      font-size:14px;
+      background:#fff;
+    }
+    textarea{
+      min-height:96px;
+      resize:vertical;
+    }
+    .actions{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top:8px;
+      flex-wrap:wrap;
+    }
+    button{
+      border:none;
+      background:var(--primary);
+      color:white;
+      border-radius:10px;
+      padding:12px 18px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button:hover{background:var(--primary-hover)}
+    button:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+    }
+    .status{
+      display:none;
+      padding:12px 14px;
+      border-radius:10px;
+      font-size:14px;
+      margin-top:16px;
+      line-height:1.4;
+    }
+    .status.ok{
+      display:block;
+      background:var(--ok-bg);
+      color:var(--ok-text);
+    }
+    .status.error{
+      display:block;
+      background:var(--error-bg);
+      color:var(--error-text);
+    }
+    .required{color:#b91c1c;}
+
+    .tooltip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      background:var(--help-icon);
+      color:white;
+      font-size:12px;
+      font-weight:700;
+      cursor:help;
+      position:relative;
+      user-select:none;
+      flex:0 0 18px;
+    }
+    .tooltip:hover::after,
+    .tooltip:focus::after{
+      content:attr(data-tooltip);
+      position:absolute;
+      left:26px;
+      top:50%;
+      transform:translateY(-50%);
+      width:260px;
+      max-width:70vw;
+      background:var(--help-bg);
+      color:var(--help-text);
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:400;
+      line-height:1.45;
+      z-index:20;
+      box-shadow:0 10px 24px rgba(15,23,42,.25);
+      white-space:normal;
+    }
+    .tooltip:hover::before,
+    .tooltip:focus::before{
+      content:"";
+      position:absolute;
+      left:20px;
+      top:50%;
+      transform:translateY(-50%);
+      border:6px solid transparent;
+      border-right-color:var(--help-bg);
+      z-index:21;
+    }
+    .section-note{
+      color:var(--muted);
+      font-size:13px;
+      margin:-6px 0 14px;
+      line-height:1.45;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Cuestionario de Gestión de Stock</h1>
+      <p class="intro">Formulario para recopilar la información necesaria y elaborar un estudio técnico de inventario, niveles de stock y reabastecimiento.</p>
+      <div class="intro-box">
+        <strong>Instrucciones:</strong> responder una ficha por cada producto o familia de producto. Si algún dato no se conoce con exactitud, se puede indicar una estimación o escribir “No disponible”. Sitúa el cursor sobre el icono <strong>i</strong> para ver qué debe ponerse exactamente.
+      </div>
+
+      <form id="stockForm">
+        <fieldset>
+          <legend>1. Información general</legend>
+          <div class="grid">
+            <div>
+              <label for="empresa">Empresa / almacén <span class="required">*</span>
+                <span class="tooltip" tabindex="0" data-tooltip="Escribe el nombre de la empresa o del almacén donde se va a realizar el estudio.">i</span>
+              </label>
+              <input id="empresa" name="empresa" type="text" required />
+            </div>
+            <div>
+              <label for="responsable">Persona que responde <span class="required">*</span>
+                <span class="tooltip" tabindex="0" data-tooltip="Nombre y cargo de la persona que aporta la información, por ejemplo: jefe de almacén, gerente o responsable de compras.">i</span>
+              </label>
+              <input id="responsable" name="responsable" type="text" required />
+            </div>
+            <div>
+              <label for="fecha">Fecha <span class="required">*</span>
+                <span class="tooltip" tabindex="0" data-tooltip="Fecha en la que se cumplimenta el cuestionario.">i</span>
+              </label>
+              <input id="fecha" name="fecha" type="date" required />
+            </div>
+            <div>
+              <label for="almacenAntiguedad">Antigüedad del almacén / actividad
+                <span class="tooltip" tabindex="0" data-tooltip="Indica cuánto tiempo lleva funcionando el almacén o cuánto tiempo lleva vendiéndose ese producto, por ejemplo: 1 año, 8 meses, desde 2025.">i</span>
+              </label>
+              <input id="almacenAntiguedad" name="almacenAntiguedad" type="text" placeholder="Ej.: 1 año" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>2. Información del producto</legend>
+          <p class="section-note">Completar una ficha por cada producto o referencia importante.</p>
+          <div class="grid">
+            <div>
+              <label for="producto">Producto / referencia <span class="required">*</span>
+                <span class="tooltip" tabindex="0" data-tooltip="Nombre del producto exacto o referencia interna. Ejemplo: pistón 200N, arena de gato 10 kg, bisagra modelo X.">i</span>
+              </label>
+              <input id="producto" name="producto" type="text" required />
+            </div>
+            <div>
+              <label for="tipoDescripcion">Tipo / descripción
+                <span class="tooltip" tabindex="0" data-tooltip="Añade una breve descripción que permita diferenciar el producto: potencia, formato, tamaño, envase, modelo o uso.">i</span>
+              </label>
+              <input id="tipoDescripcion" name="tipoDescripcion" type="text" />
+            </div>
+            <div>
+              <label for="desdeCuando">¿Desde cuándo se vende?
+                <span class="tooltip" tabindex="0" data-tooltip="Fecha aproximada desde la que se comercializa el producto. Si no recuerda el día exacto, basta con indicar mes y año.">i</span>
+              </label>
+              <input id="desdeCuando" name="desdeCuando" type="text" placeholder="Ej.: Desde mayo de 2025" />
+            </div>
+            <div>
+              <label for="tipoVenta">Tipo de venta
+                <span class="tooltip" tabindex="0" data-tooltip="Selecciona 'Regular' si el producto se vende de forma frecuente y 'Puntual' si solo sale en ocasiones concretas.">i</span>
+              </label>
+              <select id="tipoVenta" name="tipoVenta">
+                <option value="">Selecciona una opción</option>
+                <option>Regular</option>
+                <option>Puntual</option>
+              </select>
+            </div>
+            <div>
+              <label for="precioCompra">Precio aproximado de compra por unidad
+                <span class="tooltip" tabindex="0" data-tooltip="Importe aproximado que paga la empresa por una unidad. Sirve para valorar económicamente el inventario.">i</span>
+              </label>
+              <input id="precioCompra" name="precioCompra" type="text" placeholder="Ej.: 4,50 €/unidad" />
+            </div>
+            <div>
+              <label for="stockActual">Stock actual aproximado
+                <span class="tooltip" tabindex="0" data-tooltip="Número aproximado de unidades disponibles ahora mismo en el almacén.">i</span>
+              </label>
+              <input id="stockActual" name="stockActual" type="number" min="0" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>3. Datos de ventas y demanda</legend>
+          <div class="grid">
+            <div>
+              <label for="unidadesMes">Unidades vendidas al mes
+                <span class="tooltip" tabindex="0" data-tooltip="Número aproximado de unidades vendidas en un mes normal. Si no se sabe exacto, puede estimarse usando facturas o experiencia.">i</span>
+              </label>
+              <input id="unidadesMes" name="unidadesMes" type="number" min="0" />
+            </div>
+            <div>
+              <label for="mesMayorDemanda">Mes o periodo de mayor demanda
+                <span class="tooltip" tabindex="0" data-tooltip="Indica en qué mes o periodo suele venderse más este producto. Si no hay estacionalidad, escribir 'No aplica'.">i</span>
+              </label>
+              <input id="mesMayorDemanda" name="mesMayorDemanda" type="text" placeholder="Ej.: verano / diciembre / no aplica" />
+            </div>
+            <div>
+              <label for="estacionalidad">¿Hay estacionalidad?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si hay meses concretos donde la demanda sube o baja claramente respecto al resto del año.">i</span>
+              </label>
+              <select id="estacionalidad" name="estacionalidad">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="picosDemanda">¿Hay picos de demanda?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si a veces aparece un pedido grande o una subida puntual inesperada de ventas.">i</span>
+              </label>
+              <select id="picosDemanda" name="picosDemanda">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="detallePicos">Detalle de picos de demanda
+                <span class="tooltip" tabindex="0" data-tooltip="Explica cuándo ocurren los picos y de qué magnitud son aproximadamente. Ejemplo: algunos clientes piden el doble al final de mes.">i</span>
+              </label>
+              <textarea id="detallePicos" name="detallePicos"></textarea>
+            </div>
+            <div>
+              <label for="historicoVentas">¿Existe histórico de ventas?
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si hay registros como facturas, Excel, ERP, albaranes o cualquier documento que permita revisar ventas pasadas.">i</span>
+              </label>
+              <select id="historicoVentas" name="historicoVentas">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="frecuenciaReposicionActual">Frecuencia actual de reposición
+                <span class="tooltip" tabindex="0" data-tooltip="Cada cuánto se suele pedir este producto actualmente: semanal, quincenal, mensual, cuando falta, etc.">i</span>
+              </label>
+              <input id="frecuenciaReposicionActual" name="frecuenciaReposicionActual" type="text" placeholder="Ej.: cada 15 días" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>4. Proveedores y tiempos</legend>
+          <div class="grid">
+            <div>
+              <label for="proveedor">Proveedor principal
+                <span class="tooltip" tabindex="0" data-tooltip="Nombre del proveedor habitual de este producto.">i</span>
+              </label>
+              <input id="proveedor" name="proveedor" type="text" />
+            </div>
+            <div>
+              <label for="proveedorAlternativo">¿Existe proveedor alternativo?
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si hay otro proveedor disponible en caso de urgencia o falta de stock del proveedor principal.">i</span>
+              </label>
+              <input id="proveedorAlternativo" name="proveedorAlternativo" type="text" placeholder="Ej.: Sí, proveedor B / No" />
+            </div>
+            <div>
+              <label for="tiempoEntrega">Tiempo de entrega habitual (días)
+                <span class="tooltip" tabindex="0" data-tooltip="Número de días desde que se hace el pedido hasta que llega la mercancía al almacén.">i</span>
+              </label>
+              <input id="tiempoEntrega" name="tiempoEntrega" type="number" min="0" />
+            </div>
+            <div>
+              <label for="tiempoEstable">¿El tiempo de entrega es estable?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si normalmente tarda siempre lo mismo. Marca 'No' si a veces llega antes o más tarde.">i</span>
+              </label>
+              <select id="tiempoEstable" name="tiempoEstable">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="tiempoEntregaMaximo">Tiempo de entrega máximo observado
+                <span class="tooltip" tabindex="0" data-tooltip="Mayor número de días que ha tardado en llegar un pedido cuando ha habido retrasos.">i</span>
+              </label>
+              <input id="tiempoEntregaMaximo" name="tiempoEntregaMaximo" type="text" placeholder="Ej.: 10 días" />
+            </div>
+            <div>
+              <label for="pedidoUrgente">¿Se pueden hacer pedidos urgentes?
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si el proveedor ofrece entregas urgentes o reposiciones aceleradas en caso de necesidad.">i</span>
+              </label>
+              <select id="pedidoUrgente" name="pedidoUrgente">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="retrasos">Retrasos habituales o incidencias de proveedor
+                <span class="tooltip" tabindex="0" data-tooltip="Describe si el proveedor suele retrasarse, traer cantidades incompletas o generar incidencias frecuentes.">i</span>
+              </label>
+              <textarea id="retrasos" name="retrasos"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>5. Condiciones de compra</legend>
+          <div class="grid">
+            <div>
+              <label for="pedidoMinimo">¿Existe pedido mínimo?
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si el proveedor obliga a pedir una cantidad mínima en cada pedido.">i</span>
+              </label>
+              <select id="pedidoMinimo" name="pedidoMinimo">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="cantidadMinima">Cantidad mínima de pedido
+                <span class="tooltip" tabindex="0" data-tooltip="Número mínimo de unidades, cajas o pallets que el proveedor exige pedir.">i</span>
+              </label>
+              <input id="cantidadMinima" name="cantidadMinima" type="text" />
+            </div>
+            <div>
+              <label for="descuentosVolumen">¿Hay descuentos por volumen?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si comprar más cantidad reduce el precio unitario o mejora las condiciones de compra.">i</span>
+              </label>
+              <select id="descuentosVolumen" name="descuentosVolumen">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="detalleDescuentos">Detalle de descuentos por volumen
+                <span class="tooltip" tabindex="0" data-tooltip="Explica a partir de qué cantidad se aplica el descuento y cómo cambia el precio. Ejemplo: a partir de 100 unidades baja un 5 %.">i</span>
+              </label>
+              <input id="detalleDescuentos" name="detalleDescuentos" type="text" />
+            </div>
+            <div>
+              <label for="costeTransporte">Coste de transporte
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si el transporte tiene un coste fijo, variable o si va incluido en el precio del producto.">i</span>
+              </label>
+              <input id="costeTransporte" name="costeTransporte" type="text" placeholder="Ej.: 12 € por pedido / incluido" />
+            </div>
+            <div>
+              <label for="unidadCompra">Unidad de compra habitual
+                <span class="tooltip" tabindex="0" data-tooltip="Especifica cómo se compra normalmente: unidades, cajas, sacos, lotes, pallets, etc.">i</span>
+              </label>
+              <input id="unidadCompra" name="unidadCompra" type="text" placeholder="Ej.: cajas de 20" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>6. Capacidad y características de almacenamiento</legend>
+          <div class="grid">
+            <div>
+              <label for="limitacionEspacio">¿Hay limitación de espacio?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si el espacio disponible en almacén condiciona la cantidad que puede guardarse de este producto.">i</span>
+              </label>
+              <select id="limitacionEspacio" name="limitacionEspacio">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="ocupaMuchoEspacio">¿El producto ocupa mucho espacio?
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si el producto es voluminoso o pesado y consume mucho sitio dentro del almacén.">i</span>
+              </label>
+              <select id="ocupaMuchoEspacio" name="ocupaMuchoEspacio">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="condicionesEspeciales">¿Requiere condiciones especiales?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si el producto necesita cuidado especial, temperatura concreta, protección extra, manipulación delicada o separación del resto.">i</span>
+              </label>
+              <select id="condicionesEspeciales" name="condicionesEspeciales">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="caducidadObsolescencia">¿Tiene riesgo de caducidad u obsolescencia?
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si el producto puede caducar, deteriorarse o quedarse anticuado si permanece mucho tiempo almacenado.">i</span>
+              </label>
+              <select id="caducidadObsolescencia" name="caducidadObsolescencia">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="productosEspacio">Productos o formatos que ocupan más espacio
+                <span class="tooltip" tabindex="0" data-tooltip="Explica qué referencias son las más voluminosas o más difíciles de almacenar.">i</span>
+              </label>
+              <textarea id="productosEspacio" name="productosEspacio"></textarea>
+            </div>
+            <div class="full">
+              <label for="problemasAlmacen">Problemas actuales de almacenamiento
+                <span class="tooltip" tabindex="0" data-tooltip="Describe incidencias como falta de hueco, productos mal ubicados, mercancía difícil de mover, mezcla de referencias o daños.">i</span>
+              </label>
+              <textarea id="problemasAlmacen" name="problemasAlmacen"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>7. Situación actual del stock</legend>
+          <div class="grid">
+            <div>
+              <label for="roturasStock">¿Se producen roturas de stock?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si alguna vez se quedan sin producto disponible para vender o servir al cliente.">i</span>
+              </label>
+              <select id="roturasStock" name="roturasStock">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="impactoFaltaProducto">¿Qué ocurre si falta este producto?
+                <span class="tooltip" tabindex="0" data-tooltip="Explica el impacto de no tener stock: pérdida de venta, retraso al cliente, parada de trabajo, reclamaciones, etc.">i</span>
+              </label>
+              <input id="impactoFaltaProducto" name="impactoFaltaProducto" type="text" placeholder="Ej.: se pierde la venta" />
+            </div>
+            <div class="full">
+              <label for="productosRotura">Productos afectados por roturas
+                <span class="tooltip" tabindex="0" data-tooltip="Indica qué productos suelen agotarse y con qué frecuencia aproximada.">i</span>
+              </label>
+              <textarea id="productosRotura" name="productosRotura"></textarea>
+            </div>
+            <div class="full">
+              <label for="altaRotacion">Productos de alta rotación
+                <span class="tooltip" tabindex="0" data-tooltip="Productos que se venden o salen del almacén con más frecuencia que el resto.">i</span>
+              </label>
+              <textarea id="altaRotacion" name="altaRotacion"></textarea>
+            </div>
+            <div>
+              <label for="excesoStock">¿Existe exceso de stock?
+                <span class="tooltip" tabindex="0" data-tooltip="Marca 'Sí' si hay productos acumulados durante demasiado tiempo o en cantidades mayores de las necesarias.">i</span>
+              </label>
+              <select id="excesoStock" name="excesoStock">
+                <option value="">Selecciona una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div>
+              <label for="inventarioRevisado">¿Se revisa el inventario físicamente?
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si se hacen recuentos físicos y con qué frecuencia aproximada: semanal, mensual, nunca, etc.">i</span>
+              </label>
+              <input id="inventarioRevisado" name="inventarioRevisado" type="text" placeholder="Ej.: una vez al mes" />
+            </div>
+            <div class="full">
+              <label for="productosExceso">Productos con exceso de stock
+                <span class="tooltip" tabindex="0" data-tooltip="Indica qué productos sobran habitualmente o permanecen mucho tiempo almacenados.">i</span>
+              </label>
+              <textarea id="productosExceso" name="productosExceso"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>8. Gestión actual</legend>
+          <div class="grid">
+            <div class="full">
+              <label for="decisionPedido">¿Cómo se decide actualmente cuándo hacer un pedido?
+                <span class="tooltip" tabindex="0" data-tooltip="Explica el criterio actual: cuando queda poco, cuando avisa el comercial, por intuición, una vez al mes, etc.">i</span>
+              </label>
+              <textarea id="decisionPedido" name="decisionPedido"></textarea>
+            </div>
+            <div>
+              <label for="sistemaGestion">Sistema utilizado para gestionar el stock
+                <span class="tooltip" tabindex="0" data-tooltip="Indica si se utiliza Excel, ERP, programa de gestión, papel, WhatsApp o control manual.">i</span>
+              </label>
+              <input id="sistemaGestion" name="sistemaGestion" type="text" />
+            </div>
+            <div>
+              <label for="responsableCompras">Responsable de compras
+                <span class="tooltip" tabindex="0" data-tooltip="Persona que normalmente decide o autoriza las compras.">i</span>
+              </label>
+              <input id="responsableCompras" name="responsableCompras" type="text" />
+            </div>
+            <div>
+              <label for="criterioPrioridad">Criterio de prioridad actual
+                <span class="tooltip" tabindex="0" data-tooltip="Explica qué se prioriza hoy: producto que más se vende, lo que falta, lo urgente del cliente, el espacio o el coste.">i</span>
+              </label>
+              <input id="criterioPrioridad" name="criterioPrioridad" type="text" />
+            </div>
+            <div>
+              <label for="objetivoServicio">Nivel de servicio deseado
+                <span class="tooltip" tabindex="0" data-tooltip="Indica qué espera la empresa: tener siempre disponible el producto, reponer en pocos días, trabajar con poco stock, etc.">i</span>
+              </label>
+              <input id="objetivoServicio" name="objetivoServicio" type="text" placeholder="Ej.: evitar faltas de stock" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>9. Datos útiles para valorar costes y observaciones finales</legend>
+          <p class="section-note">Se ha eliminado el campo de coste de almacenamiento porque ese cálculo lo realizarás tú en la fase de tarificación. Aquí solo se piden datos de apoyo.</p>
+          <div class="grid">
+            <div>
+              <label for="costePedido">Coste aproximado de hacer un pedido
+                <span class="tooltip" tabindex="0" data-tooltip="Si se conoce, indicar el coste administrativo o logístico asociado a emitir un pedido. Si no se sabe, puede dejarse en blanco.">i</span>
+              </label>
+              <input id="costePedido" name="costePedido" type="text" />
+            </div>
+            <div>
+              <label for="valoracionCriticidad">Criticidad del producto
+                <span class="tooltip" tabindex="0" data-tooltip="Valora si este producto es poco, medio o muy importante para el negocio. Sirve para priorizarlo en el estudio.">i</span>
+              </label>
+              <select id="valoracionCriticidad" name="valoracionCriticidad">
+                <option value="">Selecciona una opción</option>
+                <option>Alta</option>
+                <option>Media</option>
+                <option>Baja</option>
+              </select>
+            </div>
+            <div class="full">
+              <label for="documentosDisponibles">Documentos o fuentes disponibles
+                <span class="tooltip" tabindex="0" data-tooltip="Indica qué documentos pueden ayudarte a completar el estudio: facturas, históricos, listado de compras, albaranes, emails del proveedor, etc.">i</span>
+              </label>
+              <textarea id="documentosDisponibles" name="documentosDisponibles"></textarea>
+            </div>
+            <div class="full">
+              <label for="observaciones">Observaciones finales
+                <span class="tooltip" tabindex="0" data-tooltip="Cualquier información adicional relevante para entender mejor la gestión del producto o del almacén.">i</span>
+              </label>
+              <textarea id="observaciones" name="observaciones"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button id="submitBtn" type="submit">Enviar respuestas</button>
+          <span class="hint">Las respuestas se enviarán a Google Sheets cuando la URL del script esté correctamente conectada.</span>
+        </div>
+
+        <div id="statusBox" class="status"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykL-aT9iAssjxnUBBt9aHlF9xRyCy4Pt4hTH_ySXGPOyTu7tbPaDPTZxgoT4fFw3Uc/exec";
+
+    const form = document.getElementById("stockForm");
+    const statusBox = document.getElementById("statusBox");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showStatus(type, message){
+      statusBox.className = "status " + type;
+      statusBox.textContent = message;
+    }
+
+    form.addEventListener("submit", async function(e){
+      e.preventDefault();
+
+      if (!SCRIPT_URL || SCRIPT_URL.includes("PEGA_AQUI_TU_URL_DE_APPS_SCRIPT")) {
+        showStatus("error", "Falta pegar la URL de Google Apps Script en el archivo HTML.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      showStatus("ok", "Enviando respuestas...");
+
+      const formData = new FormData(form);
+      const payload = {};
+      for (const [key, value] of formData.entries()) {
+        payload[key] = value;
+      }
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+
+        if (!response.ok) {
+          throw new Error(text || "Error al enviar el formulario");
+        }
+
+        showStatus("ok", "Formulario enviado correctamente. Las respuestas ya están en Google Sheets.");
+        form.reset();
+      } catch (error) {
+        showStatus("error", "No se pudo enviar. Revisa la URL del script y que esté desplegado como aplicación web.");
+        console.error(error);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
